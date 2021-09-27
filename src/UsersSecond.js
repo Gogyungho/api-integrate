@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import axios from 'axios';
-import useAsync from './useAsync';
+import {useAsync} from 'react-async';
 import User from './User';
 
 async function getUsers() {
@@ -10,13 +10,14 @@ async function getUsers() {
 
 function UsersSecond() {
 
-    const [state, refetch] = useAsync(getUsers, [], true);
     const [userId, setUserId] = useState(null);
+    const {data: users, error, isLoading, reload} = useAsync({
+        promiseFn: getUsers,
+    })
 
-    const { loading, data: users, error} = state;
-    if(loading) return <div>로딩중...</div>
+    if(isLoading) return <div>로딩중...</div>
     if(error) return <div>에러가 발생했습니다. </div>
-    if(!users) return <button onClick={refetch}>불러오기</button>;
+    if(!users) return <button onClick={reload}>불러오기</button>;
     return  (
         <>
     <ul>
@@ -25,10 +26,17 @@ function UsersSecond() {
        </li>
        ))}
     </ul>
-    <button onClick = {refetch}>다시 불러오기</button>
+    <button onClick = {reload}>다시 불러오기</button>
        { userId && <User id={userId} /> }
     </>
     );
 }
 
 export default UsersSecond;
+
+/*
+react-async의 장단점 
+장점으로는 필요할때 바로 설치해서 사용할 수 있다. 컴포넌트에서 비동기 작업할때 필요한 기능들도 가지고있다. 
+특정 promise를 기다리는 작업을 도중에 취소할수 있다. 
+단점은 옵션이 복잡하다. 
+*/
