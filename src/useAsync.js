@@ -26,7 +26,7 @@ function asyncReducer(state, action) {
     }
 }
 
-function useAsync(callback, deps =[]){
+function useAsync(callback, deps =[], skip = false){
     const [ state, dispatch] = useReducer(asyncReducer, {
         loading: false,
         data: null,
@@ -37,14 +37,19 @@ function useAsync(callback, deps =[]){
         dispatch({ type: "LOADING" });
         try{
             const data = await callback();
+            dispatch({type: 'SUCCESS', data});
         }catch(e){
         dispatch({ type: 'ERROR', error: e})
         }
     }, [callback]);
     useEffect(()=>{
+        if(skip){
+            return;
+        }
         fetchData();
         // eslint-disable-next-line
     }, deps)
     return [state, fetchData];
 }
 
+export default useAsync;
